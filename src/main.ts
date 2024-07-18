@@ -1,5 +1,6 @@
 import { ErrorMapper } from "utils/ErrorMapper";
-import type = Mocha.utils.type;
+import { CreepImplementation } from "./creeps/Creep";
+import { GruntCreepStrategy } from "./creeps/roles/Grunt";
 
 declare global {
   /*
@@ -18,8 +19,10 @@ declare global {
 
   interface CreepMemory {
     role: string;
+    state: string;
+    target: Source | Mineral<MineralConstant> | Deposit | StructureController | null | undefined;
+    targetPos: RoomPosition | null | undefined;
     room: string;
-    working: boolean;
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -37,19 +40,30 @@ declare global {
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
-  console.log(`Current game tick is ${Game.time}`);
-  if (!Memory.creeps.YeyGuy) {
-    Object.values(Game.rooms).forEach(room => {
-      const spawn = room.find(FIND_MY_SPAWNS)[0];
-      spawn.spawnCreep([WORK, CARRY, MOVE], "YeyGuy");
-    });
-  }
   // Automatically delete memory of missing creeps
+  if (Memory.creeps && Object.keys(Memory.creeps).length < 5) {
+    for (const name in Game.rooms) {
+      const spawns = Game.rooms[name].find(FIND_MY_SPAWNS);
+      if (Array.isArray(spawns) && spawns.length > 0) {
+        const creepMemory: CreepMemory = {
+          role: "Grunt",
+          target: null,
+          targetPos: null,
+          room: name,
+          state: ""
+        };
+        spawns[0].spawnCreep([MOVE, WORK, CARRY], Game.time.toString(), {
+          memory: creepMemory
+        });
+      }
+    }
+  }
   for (const name in Memory.creeps) {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];
     } else {
-      Game.creeps[name].say("YEY!!!");
+      const gruntCreep = new CreepImplementation(name, new GruntCreepStrategy());
+      gruntCreep.work(); // This will execute Grunt's work
     }
   }
 });

@@ -15,7 +15,8 @@
   },
   "files": [".eslintrc.js"],
   "include": [
-    "src/**/*.ts" // this glob pattern should match your file
+    "src/**/*.ts", // this glob pattern should match your file
+    "test/**/*.ts" // this glob pattern should match your file
   ],
   "exclude": [
     "node_modules"
