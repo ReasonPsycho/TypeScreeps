@@ -1,5 +1,4 @@
 import { ErrorMapper } from "utils/ErrorMapper";
-import { CreepImplementation } from "./creeps/Creep";
 import { GruntCreepStrategy } from "./creeps/roles/Grunt";
 
 declare global {
@@ -20,9 +19,12 @@ declare global {
   interface CreepMemory {
     role: string;
     state: string;
-    target: Source | Mineral<MineralConstant> | Deposit | StructureController | null | undefined;
-    targetPos: RoomPosition | null | undefined;
-    room: string;
+    target: Target | null | undefined;
+  }
+
+  interface Target {
+    roomPosition: RoomPosition;
+    id: Id<any>;
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -40,16 +42,18 @@ declare global {
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
+  //console.log(JSON.stringify(Memory));
   // Automatically delete memory of missing creeps
-  if (Memory.creeps && Object.keys(Memory.creeps).length < 5) {
+  if (!Memory.creeps) {
+    Memory.creeps = {};
+  }
+  if (Memory.creeps && Object.keys(Memory.creeps).length < 8) {
     for (const name in Game.rooms) {
       const spawns = Game.rooms[name].find(FIND_MY_SPAWNS);
       if (Array.isArray(spawns) && spawns.length > 0) {
         const creepMemory: CreepMemory = {
           role: "Grunt",
           target: null,
-          targetPos: null,
-          room: name,
           state: ""
         };
         spawns[0].spawnCreep([MOVE, WORK, CARRY], Game.time.toString(), {
@@ -62,8 +66,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];
     } else {
-      const gruntCreep = new CreepImplementation(name, new GruntCreepStrategy());
-      gruntCreep.work(); // This will execute Grunt's work
+      if (Memory.creeps[name]?.role === "Grunt") {
+        const gruntCreep = new CreepImplementation(name, new GruntCreepStrategy());
+        gruntCreep.work(); // This will execute Grunt's work
+      }
     }
   }
 });

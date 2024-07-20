@@ -1,50 +1,98 @@
-import { CreepStrategy } from "../Creep";
+import { CreepStrategy, State, Transition } from "../Creep";
 
-export class GruntCreepStrategy implements CreepStrategy {
-  public work(name: string): void {
-    let creepMemory = Memory.creeps[name];
-    if (!creepMemory.state) {
-      creepMemory.state = "Gather";
-      creepMemory.target = null;
-    }
-    Game.creeps[name].say(creepMemory.state);
-    switch (creepMemory.state) {
-      case "Gather":
-        if (Game.creeps[name].store.energy === 100) {
-          creepMemory.state = "Upgrade";
-          creepMemory.target = null;
-        }
-        if (!creepMemory.target) {
-          const tmpTarget = Game.creeps[name].pos.findClosestByPath(FIND_SOURCES);
-          creepMemory.target = tmpTarget;
-          creepMemory.targetPos = tmpTarget?.pos;
-        }
-        console.log(Game.creeps[name].pos);
-        if (creepMemory.targetPos && Game.creeps[name].pos.isNearTo(creepMemory.targetPos)) {
-          if (creepMemory.target instanceof Source) Game.creeps[name].harvest(creepMemory.target);
-        } else {
-          if (creepMemory.targetPos instanceof RoomPosition) Game.creeps[name].moveTo(creepMemory.targetPos);
-        }
-        break;
-      case "Upgrade":
-        console.log(Game.creeps[name].store.energy);
-        console.log(Game.creeps[name].store.getCapacity(RESOURCE_ENERGY));
-        if (Game.creeps[name].store.energy >= Game.creeps[name].store.getCapacity(RESOURCE_ENERGY)) {
-          creepMemory.state = "Gather";
-          creepMemory.target = null;
-        }
-        if (!creepMemory.target) {
-          const tmpTarget = Game.rooms[creepMemory.room].controller;
-          creepMemory.target = tmpTarget;
-          creepMemory.targetPos = tmpTarget?.pos;
-        }
-        if (creepMemory.targetPos && Game.creeps[name].pos.inRangeTo(creepMemory.targetPos, 2)) {
-          if (creepMemory.target instanceof StructureController)
-            Game.creeps[name].transfer(creepMemory.target, RESOURCE_ENERGY);
-        } else {
-          if (creepMemory.targetPos instanceof RoomPosition) Game.creeps[name].moveTo(creepMemory.targetPos);
-        }
-        break;
+export class Gather implements State {
+  public enter(creep: Creep): void {
+    const tmpTarget = creep.pos.findClosestByPath(FIND_SOURCES);
+    if (tmpTarget) {
+      creep.memory.target = { id: tmpTarget.id, roomPosition: tmpTarget.pos };
+    } else {
+      creep.memory.target = null;
     }
   }
+
+  public execute(creep: Creep): void {
+    if (creep.memory.target) {
+      if (
+        creep.memory.target &&
+        creep.pos.isNearTo(creep.memory.target.roomPosition.x, creep.memory.target.roomPosition.y)
+      ) {
+        const source: Source | null = Game.getObjectById<Source>(creep.memory.target.id);
+        if (source) {
+          creep.harvest(source);
+        }
+      } else {
+        creep.moveTo(creep.memory.target.roomPosition.x, creep.memory.target.roomPosition.y);
+      }
+      if (creep.store.energy >= creep.store.getCapacity(RESOURCE_ENERGY)) { //to transition check
+        creep.memory.state = "Upgrade";
+        creep.memory.target = null;
+      }
+    }
+  }
+
+  public exit(creep: Creep): void {
+    creep.memory.target = null;
+  }
+}
+
+export class Upgrade implements State {
+  public enter(creep: Creep): void {
+    const tmpTarget = creep.room.controller;
+    if (tmpTarget) {
+      creep.memory.target = { id: tmpTarget.id, roomPosition: tmpTarget.pos };
+    } else {
+      creep.memory.target = null;
+    }
+  }
+
+  public execute(creep: Creep): void {
+    if (creep.memory.target) {
+      if (creep.pos.inRangeTo(creep.memory.target.roomPosition.x, creep.memory.target.roomPosition.y, 2)) {
+        const controller: StructureController | null = Game.getObjectById<StructureController>(creep.memory.target.id);
+        if (controller) {
+          creep.transfer(controller, RESOURCE_ENERGY);
+        }
+      } else {
+        creep.moveTo(creep.memory.target.roomPosition.x, creep.memory.target.roomPosition.y);
+      }
+      if (creep.store.energy === 0) { //to transition check
+        creep.memory.state = "Gather";
+        creep.memory.target = null;
+      }
+    }
+  }
+
+  public exit(creep: Creep): void {
+    creep.memory.target = null;
+  }
+}
+
+export class MoveToGather implements Transition {
+  condition(creep: Creep): boolean {
+    return false;
+  }
+
+  from: State | null;
+  priority: number;
+  to: State;
+}
+
+export class MoveToGather implements Transition {
+  condition(creep: Creep): boolean {
+    return false;
+  }
+
+  from: State | null;
+  priority: number;
+  to: State;
+}
+
+export class MoveToUpgrade implements Transition {
+  condition(creep: Creep): boolean {
+    return false;
+  }
+
+  from: State | null;
+  priority: number;
+  to: State;
 }

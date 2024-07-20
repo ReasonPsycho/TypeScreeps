@@ -2,7 +2,7 @@ const { readFileSync } = require('fs');
 const _ = require('lodash');
 const { ScreepsServer, stdHooks } = require('screeps-server-mockup');
 const DIST_MAIN_JS = 'dist/main.js';
-
+export const playerRoom = 'W0N1';
 /*
  * Helper class for creating a ScreepsServer and resetting it between tests.
  * See https://github.com/Hiryus/screeps-server-mockup for instructions on
@@ -33,7 +33,8 @@ class IntegrationTestHelper {
     const modules = {
         main: readFileSync(DIST_MAIN_JS).toString(),
     };
-    this._player = await this._server.world.addBot({ username: 'player', room: 'W0N1', x: 15, y: 15, modules });
+
+    this._player = await this._server.world.addBot({ username: 'player', room: playerRoom, x: 20, y: 15, modules });
 
     this._player.on('console', (logs: any[], results: any, userid: string, username: string) => {
       _.each(logs, (line: any) => console.log(`[console|${username}]`, line));
