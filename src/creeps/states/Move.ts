@@ -8,8 +8,4 @@ export class Move implements State {
     }
     return false;
   }
-
-  public exit(creep: Creep): void {
-    creep.memory.target = null;
-  }
 }
