@@ -1,5 +1,8 @@
 import { ErrorMapper } from "utils/ErrorMapper";
-import { GruntCreepStrategy } from "./creeps/roles/Grunt";
+import { Grunt } from "./creeps/roles/Grunt";
+import { State } from "./creeps/StateMachine";
+import { StateType } from "./creeps/States";
+import nodeResolve from "@rollup/plugin-node-resolve";
 
 declare global {
   /*
@@ -18,13 +21,14 @@ declare global {
 
   interface CreepMemory {
     role: string;
-    state: string;
+    state: StateType | null;
     target: Target | null | undefined;
   }
 
   interface Target {
     roomPosition: RoomPosition;
-    id: Id<any>;
+    id: Id<_HasId>;
+    type: string;
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -42,7 +46,7 @@ declare global {
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
-  //console.log(JSON.stringify(Memory));
+  // console.log(JSON.stringify(Memory));
   // Automatically delete memory of missing creeps
   if (!Memory.creeps) {
     Memory.creeps = {};
@@ -54,7 +58,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
         const creepMemory: CreepMemory = {
           role: "Grunt",
           target: null,
-          state: ""
+          state: null
         };
         spawns[0].spawnCreep([MOVE, WORK, CARRY], Game.time.toString(), {
           memory: creepMemory
@@ -66,9 +70,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];
     } else {
+      const gruntRole = new Grunt();
       if (Memory.creeps[name]?.role === "Grunt") {
-        const gruntCreep = new CreepImplementation(name, new GruntCreepStrategy());
-        gruntCreep.work(); // This will execute Grunt's work
+        gruntRole.update(Game.creeps[name]); // This will execute Grunt's work
       }
     }
   }
