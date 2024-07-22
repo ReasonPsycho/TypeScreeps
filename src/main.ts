@@ -3,6 +3,7 @@ import { Grunt } from "./creeps/roles/Grunt";
 import { State } from "./creeps/StateMachine";
 import { StateType } from "./creeps/States";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import { Roles, RoleTypes } from "./creeps/Roles";
 
 declare global {
   /*
@@ -20,7 +21,7 @@ declare global {
   }
 
   interface CreepMemory {
-    role: string;
+    role: RoleTypes;
     state: StateType | null;
     target: Target | null | undefined;
   }
@@ -28,7 +29,7 @@ declare global {
   interface Target {
     roomPosition: RoomPosition;
     id: Id<_HasId>;
-    type: string;
+    goal: StateType | null | undefined;
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -70,9 +71,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];
     } else {
-      const gruntRole = new Grunt();
-      if (Memory.creeps[name]?.role === "Grunt") {
-        gruntRole.update(Game.creeps[name]); // This will execute Grunt's work
+      if (Memory.creeps[name]?.role) {
+        Roles[Memory.creeps[name].role].update(Game.creeps[name]);
       }
     }
   }

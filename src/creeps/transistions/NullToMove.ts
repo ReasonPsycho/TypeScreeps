@@ -1,5 +1,5 @@
 import { Transition } from "../StateMachine";
-import { MOVE_STATE, StateType } from "../States";
+import { GATHER_STATE, MOVE_STATE, StateType } from "../States";
 
 export class NullToMove implements Transition {
   public condition(creep: Creep): boolean {
@@ -8,7 +8,7 @@ export class NullToMove implements Transition {
   public execute(creep: Creep): boolean {
     const tmpTarget = creep.pos.findClosestByPath(FIND_SOURCES);
     if (tmpTarget) {
-      creep.memory.target = { id: tmpTarget.id, roomPosition: tmpTarget.pos, type: RESOURCE_ENERGY };
+      creep.memory.target = { id: tmpTarget.id, roomPosition: tmpTarget.pos, goal: GATHER_STATE };
       return true;
     } else {
       creep.memory.target = null;
@@ -16,6 +16,5 @@ export class NullToMove implements Transition {
     }
   }
   public readonly from: null = null;
-  public readonly priority: number = 10;
   public readonly to: StateType = MOVE_STATE;
 }

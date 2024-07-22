@@ -8,4 +8,6 @@ export class Move implements State {
     }
     return false;
   }
+
+  public readonly priority: number = 10;
 }

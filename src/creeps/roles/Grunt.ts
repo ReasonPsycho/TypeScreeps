@@ -4,6 +4,9 @@ import { MoveToGather } from "../transistions/MoveToGather";
 import { MoveToUpgrade } from "../transistions/MoveToUpgrade";
 import { UpgradeToMove } from "../transistions/UpgradeToMove";
 import { NullToMove } from "../transistions/NullToMove";
+import { Gather } from "../states/Gather";
+import { Move } from "../states/Move";
+import { Upgrade } from "../states/Upgrade";
 
 export class Grunt extends StateMachine {
   protected transitions: Transition[] = [
