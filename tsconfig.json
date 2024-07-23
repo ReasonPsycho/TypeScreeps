@@ -8,6 +8,7 @@
     "baseUrl": "src/",
     "sourceMap": true,
     "strict": true,
+    "noImplicitAny": false,
     "experimentalDecorators": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
@@ -16,6 +17,7 @@
   "files": [".eslintrc.js"],
   "include": [
     "src/**/*.ts", // this glob pattern should match your file
+    "src/console/**/*.ts", // this glob pattern should match your file
     "test/**/*.ts" // this glob pattern should match your file
   ],
   "exclude": [

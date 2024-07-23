@@ -14,14 +14,13 @@ if (!dest) {
   throw new Error("Invalid upload destination");
 }
 
-export default {
+export default [{
   input: "src/main.ts",
   output: {
     file: "dist/main.js",
     format: "cjs",
     sourcemap: true
   },
-
   plugins: [
     clear({ targets: ["dist"] }),
     resolve({ rootDir: "src" }),
@@ -29,4 +28,19 @@ export default {
     typescript({tsconfig: "./tsconfig.json"}),
     screeps({config: cfg, dryRun: cfg == null})
   ]
+},{
+  input: 'src/console/Connect.ts', // update this line, replace with your file path
+  output: {
+    file: 'distConsole/Connect.mjs', // update this line, place the output where you need it
+    format: 'es',
+    inlineDynamicImports: true,
+  },
+  plugins: [
+    typescript({useTsconfigDeclarationDir: true}),
+    clear({ targets: ["distConsole"] }),
+    resolve({ rootDir: "src" }),
+    commonjs(),
+    typescript({tsconfig: "./tsconfig.json"}),
+  ]
 }
+]

@@ -7,6 +7,8 @@
   "scripts": {
     "lint": "eslint \"src/**/*.ts\"",
     "build": "rollup -c",
+    "build-console": "rollup -c rollup.ws.config.js",
+    "connect-console": "node distConsole/Connect.mjs",
     "push-main": "rollup -c --environment DEST:main",
     "push-pserver": "rollup -c --environment DEST:pserver",
     "push-season": "rollup -c --environment DEST:season",
@@ -43,6 +45,8 @@
     "@types/screeps": "^3.2.3",
     "@types/sinon": "^5.0.5",
     "@types/sinon-chai": "^3.2.0",
+    "@types/sockjs-client": "^1.5.4",
+    "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.29.1",
     "@typescript-eslint/typescript-estree": "^4.29.1",
@@ -67,5 +71,9 @@
     "tsconfig-paths": "^3.10.1",
     "typescript": "^4.3.5"
   },
-  "dependencies": {}
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "sockjs-client": "^1.6.1",
+    "ws": "^8.18.0"
+  }
 }
