@@ -1,6 +1,10 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { StateType } from "./creeps/States";
-import { Roles, RoleTypes } from "./creeps/Roles";
+import { RoleTypes, Roles } from "./creeps/Roles";
+import WallDistance from "utils/WallDistance";
+import { map } from "lodash";
+import MapValue from "./utils/MapValue";
+import { MAP_VALUE_FUNCTION, QueueableFunctionType, QueueableFunctions } from "./utils/QueueableFunctions";
 
 declare global {
   interface Memory {
@@ -8,10 +12,19 @@ declare global {
     log: any;
   }
 
+  interface QueuedFunctionMemory {
+    functionType: QueueableFunctionType;
+    inputVariables: any;
+  }
+
   interface CreepMemory {
     role: RoleTypes;
     state: StateType | null;
     target: Target | null | undefined;
+  }
+
+  interface RoomMemory {
+    distanceMap: number[][] | undefined;
   }
 
   interface Target {
@@ -25,7 +38,9 @@ declare global {
     // IDK why eslint is so anal, but it doesn't work otherwise
     interface Global {
       log: any;
+      queuedFunctions: QueuedFunctionMemory[];
       setUp(): void;
+      plan(roomName: string): void;
     }
   }
 }
@@ -35,15 +50,30 @@ global.setUp = () => {
   console.log("Setup complete");
 };
 
+global.plan = roomName => {
+  Memory.rooms[roomName] = { distanceMap: WallDistance(roomName) };
+  global.queuedFunctions.push({ functionType: MAP_VALUE_FUNCTION, inputVariables: roomName });
+};
+
+global.queuedFunctions = [];
+
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
   // console.log(JSON.stringify(Memory));
-  console.log("test");
   // Automatically delete memory of missing creeps
   if (!Memory.creeps) {
     Memory.creeps = {};
   }
+  if (!Memory.rooms) {
+    Memory.rooms = {};
+  }
+
+  if (global.queuedFunctions.length > 0) {
+    const queuedFunction = global.queuedFunctions.pop();
+    QueueableFunctions[queuedFunction.functionType](queuedFunction.inputVariables as string);
+  }
+
   if (Memory.creeps && Object.keys(Memory.creeps).length < 8) {
     for (const name in Game.rooms) {
       const spawns = Game.rooms[name].find(FIND_MY_SPAWNS);
@@ -59,6 +89,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
       }
     }
   }
+
   for (const name in Memory.creeps) {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];

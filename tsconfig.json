@@ -8,6 +8,7 @@
     "baseUrl": "src/",
     "sourceMap": true,
     "strict": true,
+    "strictNullChecks": false,
     "noImplicitAny": false,
     "experimentalDecorators": true,
     "noImplicitReturns": true,
