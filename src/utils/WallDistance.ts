@@ -1,24 +1,84 @@
 import { lerpColor } from "./Visual";
 
-export default function WallDistance(roomName: string): number[][] {
-  const terrain = new Room.Terrain(roomName);
-  const n = 50;
-  const m = 50;
-  const dx = [0, 1, 0, -1, -1, -1, 1, 1];
-  const dy = [1, 0, -1, 0, 1, -1, 1, -1];
+export class CustomPathFindingGrid {
+  private dx = [0, 1, 0, -1, -1, -1, 1, 1];
+  private dy = [1, 0, -1, 0, 1, -1, 1, -1];
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const distanceMap = new Array(n).fill(0).map(() => new Array(m).fill(Number.MAX_SAFE_INTEGER)) as number[][];
+  public tiles: PathFindingTile[];
+  public openQueue: PathFindingTile[] = [];
+  public closedArray: PathFindingTile[] = [];
 
-  const queue: number[][] = [];
+  public constructor(tiles: PathFindingTile[]) {
+    this.tiles = tiles;
+  }
 
+  public pushToOpen(conditionFunction: (tile: PathFindingTile) => boolean): void {
+    this.tiles.forEach(tile => {
+      if (conditionFunction(tile)) {
+        this.openQueue.push(tile);
+        this.closedArray.push(tile);
+      }
+    });
+  }
+
+  public execute() {
+    while (this.openQueue.length) {
+      const tile = this.openQueue.shift();
+
+      for (let i = 0; i < 8; i++) {
+        const neighbourTile = this.getTile(tile.pos.x, tile.pos.y);
+        if (!this.closedArray.includes(neighbourTile)) {
+          neighbourTile.value = tile.value + 1;
+          this.closedArray.push(tile);
+          this.openQueue.push(tile);
+        }
+      }
+    }
+  }
+
+  public getTile(x: number, y: number): PathFindingTile | undefined {
+    return this.tiles.find(tile => tile.pos.x === x && tile.pos.y === y);
+  }
+}
+
+class PathFindingTile {
+  public pos: { x: number; y: number };
+  public terrain: Terrain;
+  public value: number;
+
+  public constructor(x: number, y: number, terrain: Terrain) {
+    this.pos = { x, y };
+    this.terrain = terrain;
+    this.value = 0;
+  }
+}
+
+Room.prototype.getCustomGrid = function (this: Room): any {
+  const terrain = this.getTerrain();
+  const tiles: PathFindingTile[] = [];
   // Initialize distanceGrid for the wall positions.
   for (let y = 0; y < 50; y++) {
     for (let x = 0; x < 50; x++) {
-      if (terrain.get(x, y) === TERRAIN_MASK_WALL) {
-        distanceMap[x][y] = 0;
-        queue.push([x, y]);
-      }
+      tiles.push(
+        new PathFindingTile(
+          x,
+          y,
+          terrain.get(x, y) === 0 ? "plain" : terrain.get(x, y) === TERRAIN_MASK_SWAMP ? "swamp" : "wall"
+        )
+      );
+    }
+  }
+  return new CustomPathFindingGrid(tiles);
+};
+
+export default function WallDistance(roomName: string): number[][] {
+  const customGrid = Game.rooms[roomName].getCustomGrid();
+
+  customGrid.forEach(tile => {});
+  for (let y = 0; y < 50; y++) {
+    for (let x = 0; x < 50; x++) {
+      distanceMap[x][y] = 0;
+      customGrid.push(new R());
     }
   }
 

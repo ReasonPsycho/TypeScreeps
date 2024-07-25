@@ -16033,7 +16033,6 @@ getUserInfo()
     // Just a precaution, check if the SockJS exists before creating a new instance
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const socket = new entry("https://screeps.com/socket/");
-    let connected = false;
     socket.onopen = () => {
         console.log("open");
         socket.send(`auth ${apiToken}`);
@@ -16046,31 +16045,8 @@ getUserInfo()
         if (message === `auth ok ${apiToken}`) {
             console.log("Authenticated! Now subscribing to the data stream.");
             socket.send(`subscribe ${"user:59f5f6a85b3b0f302735d44a/console"}`);
-            connected = true;
         }
-        if (connected) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (message[1].messages) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                if (message[1].messages.log) {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    console.log(message[1].messages.log);
-                }
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                if (message[1].messages.error) {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    console.log(message[1].messages.error);
-                }
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                if (message[1].messages.results) {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    console.log(message[1].messages.results);
-                }
-            }
-        }
-        else {
-            console.log(message);
-        }
+        console.log(JSON.stringify(message));
     };
     // Error handling
     socket.onerror = (error) => {

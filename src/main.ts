@@ -1,15 +1,18 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { StateType } from "./creeps/States";
 import { RoleTypes, Roles } from "./creeps/Roles";
-import WallDistance from "utils/WallDistance";
-import { map } from "lodash";
-import MapValue from "./utils/MapValue";
+import WallDistance, { CustomPathFindingGrid } from "utils/WallDistance";
+
 import { MAP_VALUE_FUNCTION, QueueableFunctionType, QueueableFunctions } from "./utils/QueueableFunctions";
 
 declare global {
   interface Memory {
     uuid: number;
     log: any;
+  }
+
+  interface Room {
+    getCustomGrid: () => CustomPathFindingGrid;
   }
 
   interface QueuedFunctionMemory {
@@ -25,6 +28,7 @@ declare global {
 
   interface RoomMemory {
     distanceMap: number[][] | undefined;
+    bestSpawnPosition: RoomPosition | undefined;
   }
 
   interface Target {
@@ -51,7 +55,7 @@ global.setUp = () => {
 };
 
 global.plan = roomName => {
-  Memory.rooms[roomName] = { distanceMap: WallDistance(roomName) };
+  Memory.rooms[roomName] = { distanceMap: WallDistance(roomName), bestSpawnPosition: undefined };
   global.queuedFunctions.push({ functionType: MAP_VALUE_FUNCTION, inputVariables: roomName });
 };
 

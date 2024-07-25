@@ -87,28 +87,7 @@ getUserInfo()
         connected = true;
       }
 
-      if (connected) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (message[1].messages) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (message[1].messages.log) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            console.log(message[1].messages.log);
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (message[1].messages.error) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            console.log(message[1].messages.error);
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (message[1].messages.results) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            console.log(message[1].messages.results);
-          }
-        }
-      } else {
-        console.log(message);
-      }
+      console.log(JSON.stringify(message));
     };
 
     // Error handling
