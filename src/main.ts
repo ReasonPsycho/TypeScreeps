@@ -1,9 +1,18 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { StateType } from "./creeps/States";
 import { RoleTypes, Roles } from "./creeps/Roles";
-import WallDistance, { CustomPathFindingGrid } from "utils/WallDistance";
+import WallDistance from "utils/WallDistance";
 
-import { MAP_VALUE_FUNCTION, QueueableFunctionType, QueueableFunctions } from "./utils/QueueableFunctions";
+import {
+  QueueableFunctionType,
+  QueueableFunctions,
+  MAP_WALL_DISTANCE,
+  MAP_SOURCE_DISTANCE, MAP_CONTROLLER_DISTANCE, MAP_EXIT_DISTANCE, FIND_BEST_SPAWN_POS
+} from "./utils/QueueableFunctions";
+import { CustomPathFindingGrid, PathFindingTile } from "./utils/CustomPatfinding";
+import ExitDistance from "./utils/ExitDistance";
+import SourceDistance from "./utils/SourceDistance";
+import ControllerDistance from "./utils/ControllerDistance";
 
 declare global {
   interface Memory {
@@ -27,7 +36,7 @@ declare global {
   }
 
   interface RoomMemory {
-    distanceMap: number[][] | undefined;
+    distanceMaps: { [key: string]: number[][] | undefined };
     bestSpawnPosition: RoomPosition | undefined;
   }
 
@@ -49,14 +58,40 @@ declare global {
   }
 }
 
+Room.prototype.getCustomGrid = function (this: Room): any {
+  const terrain = this.getTerrain();
+  const exits = this.find(FIND_EXIT);
+  const sources = this.find(FIND_SOURCES);
+  const tiles: PathFindingTile[] = [];
+  // Initialize distanceGrid for the wall positions.
+  for (let y = 0; y < 50; y++) {
+    for (let x = 0; x < 50; x++) {
+      tiles.push(
+        new PathFindingTile(
+          x,
+          y,
+          terrain.get(x, y) === 0 ? "plain" : terrain.get(x, y) === TERRAIN_MASK_SWAMP ? "swamp" : "wall",
+          this.lookForAt(LOOK_STRUCTURES, x, y),
+          exits.some(exit => exit.x === x && exit.y === y)
+        )
+      );
+    }
+  }
+  return new CustomPathFindingGrid(tiles, sources, this.name);
+};
+
 global.setUp = () => {
   // Add your setup code here
   console.log("Setup complete");
 };
 
 global.plan = roomName => {
-  Memory.rooms[roomName] = { distanceMap: WallDistance(roomName), bestSpawnPosition: undefined };
-  global.queuedFunctions.push({ functionType: MAP_VALUE_FUNCTION, inputVariables: roomName });
+  Memory.rooms[roomName] = { distanceMaps: {}, bestSpawnPosition: undefined };
+  global.queuedFunctions.push({ functionType: MAP_WALL_DISTANCE, inputVariables: roomName });
+  global.queuedFunctions.push({ functionType: MAP_SOURCE_DISTANCE, inputVariables: roomName });
+  global.queuedFunctions.push({ functionType: MAP_CONTROLLER_DISTANCE, inputVariables: roomName });
+  global.queuedFunctions.push({ functionType: MAP_EXIT_DISTANCE, inputVariables: roomName });
+  global.queuedFunctions.push({ functionType: FIND_BEST_SPAWN_POS, inputVariables: roomName });
 };
 
 global.queuedFunctions = [];
@@ -74,7 +109,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
   }
 
   if (global.queuedFunctions.length > 0) {
-    const queuedFunction = global.queuedFunctions.pop();
+    const queuedFunction = global.queuedFunctions.shift();
     QueueableFunctions[queuedFunction.functionType](queuedFunction.inputVariables as string);
   }
 
