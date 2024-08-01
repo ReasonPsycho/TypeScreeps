@@ -17,6 +17,7 @@ import {
   QueueableFunctions
 } from "./utils/QueueableFunctions";
 import { CustomPathFindingGrid, PathFindingTile, visualBuildingPlan, visualMap } from "./utils/CustomPatfinding";
+import PlanBuildings from "./utils/PlanBuildings";
 
 declare global {
   interface Memory {
@@ -49,6 +50,7 @@ declare global {
     bestSpawnPosition: RoomPosition | undefined;
     bestControllerPosition: RoomPosition | undefined;
     plannedBuildings: PlannedBuilding[];
+    possibleStructurePositions: RoomPosition[];
   }
 
   interface Target {
@@ -102,7 +104,8 @@ global.plan = roomName => {
     distanceMaps: {},
     bestSpawnPosition: undefined,
     bestControllerPosition: undefined,
-    plannedBuildings: []
+    plannedBuildings: [],
+    possibleStructurePositions: []
   };
   global.queuedFunctions.push({ functionType: MAP_WALL_DISTANCE, inputVariables: roomName });
   global.queuedFunctions.push({ functionType: MAP_SOURCE_DISTANCE, inputVariables: roomName });
@@ -152,12 +155,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
   }
 
   for (const name in Memory.rooms) {
-    if (Memory.rooms[name]?.plannedBuildings) {
-      visualBuildingPlan(name);
-    }
-    if (Memory.rooms[name]?.distanceMaps?.CenterExitsDistance) {
-      visualMap(Memory.rooms[name]?.distanceMaps?.CenterExitsDistance, name);
-    }
+    PlanBuildings(name);
   }
 
   for (const name in Memory.creeps) {

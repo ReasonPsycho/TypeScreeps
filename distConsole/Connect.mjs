@@ -1,13 +1,13 @@
 import require$$1 from 'crypto';
-import require$$1$1 from 'tty';
-import require$$1$2 from 'util';
+import require$$0$1 from 'tty';
+import require$$1$1 from 'util';
 import require$$0 from 'os';
-import require$$1$3 from 'events';
-import require$$0$1 from 'buffer';
-import require$$0$2 from 'stream';
+import require$$1$2 from 'events';
+import require$$0$2 from 'buffer';
+import require$$0$3 from 'stream';
 import require$$2 from 'url';
-import require$$0$3 from 'assert';
-import require$$1$4 from 'net';
+import require$$0$4 from 'assert';
+import require$$1$3 from 'net';
 import require$$2$1 from 'tls';
 import require$$2$2 from 'http';
 import require$$3 from 'https';
@@ -21,9 +21,9 @@ import { format } from 'node:url';
 import { isIP } from 'node:net';
 import 'node:fs';
 import 'node:path';
-import require$$0$5 from 'worker_threads';
-import require$$0$4 from 'node:process';
-import require$$1$5 from 'node:stream/web';
+import require$$0$6 from 'worker_threads';
+import require$$0$5 from 'node:process';
+import require$$1$4 from 'node:stream/web';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -904,7 +904,7 @@ var y = d * 365.25;
  * @api public
  */
 
-var ms = function(val, options) {
+var ms = function (val, options) {
   options = options || {};
   var type = typeof val;
   if (type === 'string' && val.length > 0) {
@@ -1472,40 +1472,32 @@ formatters.j = function (v) {
 
 var node = {exports: {}};
 
-var hasFlag$1 = (flag, argv = process.argv) => {
+var hasFlag$1 = (flag, argv) => {
+	argv = argv || process.argv;
 	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-	const position = argv.indexOf(prefix + flag);
-	const terminatorPosition = argv.indexOf('--');
-	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+	const pos = argv.indexOf(prefix + flag);
+	const terminatorPos = argv.indexOf('--');
+	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
 };
 
 const os = require$$0;
-const tty = require$$1$1;
 const hasFlag = hasFlag$1;
 
-const {env} = process;
+const env = process.env;
 
 let forceColor;
 if (hasFlag('no-color') ||
 	hasFlag('no-colors') ||
-	hasFlag('color=false') ||
-	hasFlag('color=never')) {
-	forceColor = 0;
+	hasFlag('color=false')) {
+	forceColor = false;
 } else if (hasFlag('color') ||
 	hasFlag('colors') ||
 	hasFlag('color=true') ||
 	hasFlag('color=always')) {
-	forceColor = 1;
+	forceColor = true;
 }
-
 if ('FORCE_COLOR' in env) {
-	if (env.FORCE_COLOR === 'true') {
-		forceColor = 1;
-	} else if (env.FORCE_COLOR === 'false') {
-		forceColor = 0;
-	} else {
-		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-	}
+	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
 }
 
 function translateLevel(level) {
@@ -1521,8 +1513,8 @@ function translateLevel(level) {
 	};
 }
 
-function supportsColor(haveStream, streamIsTTY) {
-	if (forceColor === 0) {
+function supportsColor(stream) {
+	if (forceColor === false) {
 		return 0;
 	}
 
@@ -1536,21 +1528,22 @@ function supportsColor(haveStream, streamIsTTY) {
 		return 2;
 	}
 
-	if (haveStream && !streamIsTTY && forceColor === undefined) {
+	if (stream && !stream.isTTY && forceColor !== true) {
 		return 0;
 	}
 
-	const min = forceColor || 0;
-
-	if (env.TERM === 'dumb') {
-		return min;
-	}
+	const min = forceColor ? 1 : 0;
 
 	if (process.platform === 'win32') {
-		// Windows 10 build 10586 is the first Windows release that supports 256 colors.
-		// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
+		// Node.js 7.5.0 is the first version of Node.js to include a patch to
+		// libuv that enables 256 color output on Windows. Anything earlier and it
+		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
+		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
+		// release that supports 256 colors. Windows 10 build 14931 is the first release
+		// that supports 16m/TrueColor.
 		const osRelease = os.release().split('.');
 		if (
+			Number(process.versions.node.split('.')[0]) >= 8 &&
 			Number(osRelease[0]) >= 10 &&
 			Number(osRelease[2]) >= 10586
 		) {
@@ -1561,7 +1554,7 @@ function supportsColor(haveStream, streamIsTTY) {
 	}
 
 	if ('CI' in env) {
-		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI', 'GITHUB_ACTIONS', 'BUILDKITE'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
 			return 1;
 		}
 
@@ -1600,18 +1593,22 @@ function supportsColor(haveStream, streamIsTTY) {
 		return 1;
 	}
 
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
 	return min;
 }
 
 function getSupportLevel(stream) {
-	const level = supportsColor(stream, stream && stream.isTTY);
+	const level = supportsColor(stream);
 	return translateLevel(level);
 }
 
 var supportsColor_1 = {
 	supportsColor: getSupportLevel,
-	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+	stdout: getSupportLevel(process.stdout),
+	stderr: getSupportLevel(process.stderr)
 };
 
 (function (module, exports) {
@@ -1619,9 +1616,9 @@ var supportsColor_1 = {
 /**
  * Module dependencies.
  */
-var tty = require$$1$1;
+var tty = require$$0$1;
 
-var util = require$$1$2;
+var util = require$$1$1;
 /**
  * This is the Node.js implementation of `debug()`.
  */
@@ -1885,7 +1882,7 @@ if (typeof Object.create === 'function') {
 }
 
 try {
-  var util$d = require$$1$2;
+  var util$d = require$$1$1;
   /* istanbul ignore next */
   if (typeof util$d.inherits !== 'function') throw '';
   inherits$u.exports = util$d.inherits;
@@ -1900,7 +1897,7 @@ var safeBuffer = {exports: {}};
 
 (function (module, exports) {
 /* eslint-disable node/no-deprecated-api */
-var buffer = require$$0$1;
+var buffer = require$$0$2;
 var Buffer = buffer.Buffer;
 
 // alternative to using Object.keys for old browsers
@@ -2010,8 +2007,8 @@ driver having these two methods.
 **/
 
 
-var Stream$3 = require$$0$2.Stream,
-    util$c   = require$$1$2;
+var Stream$3 = require$$0$3.Stream,
+    util$c   = require$$1$1;
 
 
 var IO = function(driver) {
@@ -2215,8 +2212,8 @@ StreamReader.prototype.eachByte = function(callback, context) {
 var stream_reader = StreamReader;
 
 var Buffer$8  = safeBuffer.exports.Buffer,
-    Emitter = require$$1$3.EventEmitter,
-    util$b    = require$$1$2,
+    Emitter = require$$1$2.EventEmitter,
+    util$b    = require$$1$1,
     streams = streams$1,
     Headers$3 = headers,
     Reader  = stream_reader;
@@ -2409,7 +2406,7 @@ var base = Base$7;
 var httpParser = {};
 
 /*jshint node:true */
-var assert = require$$0$3;
+var assert = require$$0$4;
 
 httpParser.HTTPParser = HTTPParser;
 function HTTPParser(type) {
@@ -3591,7 +3588,7 @@ var message = Message$1;
 
 var Buffer$5     = safeBuffer.exports.Buffer,
     crypto$2     = require$$1,
-    util$a       = require$$1$2,
+    util$a       = require$$1$1,
     Extensions = websocket_extensions,
     Base$6       = base,
     Frame      = frame,
@@ -4072,9 +4069,9 @@ for (var key$7 in instance$7)
 var hybi = Hybi$2;
 
 var Buffer$4     = safeBuffer.exports.Buffer,
-    Stream$2     = require$$0$2.Stream,
+    Stream$2     = require$$0$3.Stream,
     url$3        = require$$2,
-    util$9       = require$$1$2,
+    util$9       = require$$1$1,
     Base$5       = base,
     Headers$2    = headers,
     HttpParser$2 = http_parser;
@@ -4172,7 +4169,7 @@ var proxy = Proxy$2;
 var Buffer$3     = safeBuffer.exports.Buffer,
     crypto$1     = require$$1,
     url$2        = require$$2,
-    util$8       = require$$1$2,
+    util$8       = require$$1$1,
     HttpParser$1 = http_parser,
     Base$4       = base,
     Hybi$1       = hybi,
@@ -4312,7 +4309,7 @@ var client$1 = Client$2;
 
 var Buffer$2 = safeBuffer.exports.Buffer,
     Base$3   = base,
-    util$7   = require$$1$2;
+    util$7   = require$$1$1;
 
 var Draft75$2 = function(request, url, options) {
   Base$3.apply(this, arguments);
@@ -4436,7 +4433,7 @@ var Buffer$1  = safeBuffer.exports.Buffer,
     Base$2    = base,
     Draft75$1 = draft75,
     crypto  = require$$1,
-    util$6    = require$$1$2;
+    util$6    = require$$1$1;
 
 
 var numberFromKey = function(key) {
@@ -4548,7 +4545,7 @@ for (var key$3 in instance$3)
 
 var draft76 = Draft76$1;
 
-var util$5       = require$$1$2,
+var util$5       = require$$1$1,
     HttpParser = http_parser,
     Base$1       = base,
     Draft75    = draft75,
@@ -4751,8 +4748,8 @@ var EventTarget$4 = {
 
 var event_target = EventTarget$4;
 
-var Stream$1      = require$$0$2.Stream,
-    util$4        = require$$1$2,
+var Stream$1      = require$$0$3.Stream,
+    util$4        = require$$1$1,
     driver$3      = driver$4,
     EventTarget$3 = event_target,
     Event$6       = event$1;
@@ -4949,8 +4946,8 @@ for (var key$1 in EventTarget$3) API$3.prototype[key$1] = EventTarget$3[key$1];
 
 var api = API$3;
 
-var util$3   = require$$1$2,
-    net    = require$$1$4,
+var util$3   = require$$1$1,
+    net    = require$$1$3,
     tls    = require$$2$1,
     url$1    = require$$2,
     driver$2 = driver$4,
@@ -5037,8 +5034,8 @@ Client.prototype._configureProxy = function(proxy, originTLS) {
 
 var client = Client;
 
-var Stream      = require$$0$2.Stream,
-    util$2        = require$$1$2,
+var Stream      = require$$0$3.Stream,
+    util$2        = require$$1$1,
     driver$1      = driver$4,
     Headers$1     = headers,
     API$1         = api,
@@ -5169,7 +5166,7 @@ for (var key in EventTarget$2) EventSource$1.prototype[key] = EventTarget$2[key]
 
 var eventsource$3 = EventSource$1;
 
-var util$1   = require$$1$2,
+var util$1   = require$$1$1,
     driver = driver$4,
     API    = api;
 
@@ -5214,7 +5211,7 @@ var websocket$1 = websocket$2.Client;
 var utils$2 = event$2.exports
   , urlUtils$a = url$4
   , inherits$t = inherits$u.exports
-  , EventEmitter$e = require$$1$3.EventEmitter
+  , EventEmitter$e = require$$1$2.EventEmitter
   , WebsocketDriver = websocket$1
   ;
 
@@ -5310,7 +5307,7 @@ WebSocketTransport.roundTrips = 2;
 var websocket = WebSocketTransport;
 
 var inherits$s = inherits$u.exports
-  , EventEmitter$d = require$$1$3.EventEmitter
+  , EventEmitter$d = require$$1$2.EventEmitter
   ;
 
 var debug$h = function() {};
@@ -5396,7 +5393,7 @@ BufferedSender$1.prototype.close = function() {
 var bufferedSender = BufferedSender$1;
 
 var inherits$r = inherits$u.exports
-  , EventEmitter$c = require$$1$3.EventEmitter
+  , EventEmitter$c = require$$1$2.EventEmitter
   ;
 
 var debug$g = function() {};
@@ -5544,7 +5541,7 @@ inherits$p(AjaxBasedTransport$6, SenderReceiver$1);
 var ajaxBased = AjaxBasedTransport$6;
 
 var inherits$o = inherits$u.exports
-  , EventEmitter$b = require$$1$3.EventEmitter
+  , EventEmitter$b = require$$1$2.EventEmitter
   ;
 
 var debug$d = function() {};
@@ -5612,7 +5609,7 @@ XhrReceiver$4.prototype.abort = function() {
 
 var xhr$1 = XhrReceiver$4;
 
-var EventEmitter$a = require$$1$3.EventEmitter
+var EventEmitter$a = require$$1$2.EventEmitter
   , inherits$n = inherits$u.exports
   , http$1 = require$$2$2
   , https$1 = require$$3
@@ -5778,7 +5775,7 @@ XhrStreamingTransport.needBody = !!commonjsGlobal.document;
 
 var xhrStreaming = XhrStreamingTransport;
 
-var EventEmitter$9 = require$$1$3.EventEmitter
+var EventEmitter$9 = require$$1$2.EventEmitter
   , inherits$j = inherits$u.exports
   , eventUtils$3 = event$2.exports
   , browser$2 = browser$4
@@ -5912,10 +5909,10 @@ XdrStreamingTransport$1.roundTrips = 2; // preflight, ajax
 var xdrStreaming = XdrStreamingTransport$1;
 
 var parse = require$$2.parse;
-var events = require$$1$3;
+var events = require$$1$2;
 var https = require$$3;
 var http = require$$2$2;
-var util = require$$1$2;
+var util = require$$1$1;
 
 var httpsOptions = [
   'pfx', 'key', 'passphrase', 'cert', 'ca', 'ciphers',
@@ -6408,7 +6405,7 @@ function removeUnsafeHeaders (headers) {
 }
 
 var inherits$h = inherits$u.exports
-  , EventEmitter$8 = require$$1$3.EventEmitter
+  , EventEmitter$8 = require$$1$2.EventEmitter
   , EventSourceDriver$1 = eventsource$2
   ;
 
@@ -6695,7 +6692,7 @@ if (commonjsGlobal.document) {
 //    http://stevesouders.com/misc/test-postmessage.php
 
 var inherits$f = inherits$u.exports
-  , EventEmitter$7 = require$$1$3.EventEmitter
+  , EventEmitter$7 = require$$1$2.EventEmitter
   , version = version$1
   , urlUtils$6 = url$4
   , iframeUtils$3 = iframe$1.exports
@@ -6883,7 +6880,7 @@ var iframeWrap = function(transport) {
 var inherits$d = inherits$u.exports
   , iframeUtils$2 = iframe$1.exports
   , urlUtils$5 = url$4
-  , EventEmitter$6 = require$$1$3.EventEmitter
+  , EventEmitter$6 = require$$1$2.EventEmitter
   , random$3 = random$5
   ;
 
@@ -7049,7 +7046,7 @@ var utils$1 = iframe$1.exports
   , browser$1 = browser$4
   , urlUtils$4 = url$4
   , inherits$9 = inherits$u.exports
-  , EventEmitter$5 = require$$1$3.EventEmitter
+  , EventEmitter$5 = require$$1$2.EventEmitter
   ;
 
 var debug$7 = function() {};
@@ -8058,7 +8055,7 @@ inherits$6(TransportMessageEvent$1, Event$1);
 
 var transMessage = TransportMessageEvent$1;
 
-var EventEmitter$4 = require$$1$3.EventEmitter
+var EventEmitter$4 = require$$1$2.EventEmitter
   , inherits$5 = inherits$u.exports
   ;
 
@@ -8081,7 +8078,7 @@ XHRFake$1.timeout = 2000;
 
 var xhrFake = XHRFake$1;
 
-var EventEmitter$3 = require$$1$3.EventEmitter
+var EventEmitter$3 = require$$1$2.EventEmitter
   , inherits$4 = inherits$u.exports
   , objectUtils$1 = object
   ;
@@ -8129,7 +8126,7 @@ InfoAjax$2.prototype.close = function() {
 var infoAjax = InfoAjax$2;
 
 var inherits$3 = inherits$u.exports
-  , EventEmitter$2 = require$$1$3.EventEmitter
+  , EventEmitter$2 = require$$1$2.EventEmitter
   , XHRLocalObject = xhrLocal
   , InfoAjax$1 = infoAjax
   ;
@@ -8159,7 +8156,7 @@ InfoReceiverIframe$1.prototype.close = function() {
 
 var infoIframeReceiver = InfoReceiverIframe$1;
 
-var EventEmitter$1 = require$$1$3.EventEmitter
+var EventEmitter$1 = require$$1$2.EventEmitter
   , inherits$2 = inherits$u.exports
   , utils = event$2.exports
   , IframeTransport = iframe
@@ -8226,7 +8223,7 @@ InfoIframe$1.prototype.close = function() {
 
 var infoIframe = InfoIframe$1;
 
-var EventEmitter = require$$1$3.EventEmitter
+var EventEmitter = require$$1$2.EventEmitter
   , inherits$1 = inherits$u.exports
   , urlUtils$2 = url$4
   , XDR = xdr
@@ -13635,11 +13632,11 @@ if (!globalThis.ReadableStream) {
   // and it's preferred over the polyfilled version. So we also
   // suppress the warning that gets emitted by NodeJS for using it.
   try {
-    const process = require$$0$4;
+    const process = require$$0$5;
     const { emitWarning } = process;
     try {
       process.emitWarning = () => {};
-      Object.assign(globalThis, require$$1$5);
+      Object.assign(globalThis, require$$1$4);
       process.emitWarning = emitWarning;
     } catch (error) {
       process.emitWarning = emitWarning;
@@ -13654,7 +13651,7 @@ if (!globalThis.ReadableStream) {
 try {
   // Don't use node: prefix for this, require+node: is not supported until node v14.14
   // Only `import()` can use prefix in 12.20 and later
-  const { Blob } = require$$0$1;
+  const { Blob } = require$$0$2;
   if (Blob && !Blob.prototype.stream) {
     Blob.prototype.stream = function name (params) {
       let position = 0;
@@ -15608,7 +15605,7 @@ class AbortError extends FetchBaseError {
 
 if (!globalThis.DOMException) {
   try {
-    const { MessageChannel } = require$$0$5,
+    const { MessageChannel } = require$$0$6,
     port = new MessageChannel().port1,
     ab = new ArrayBuffer();
     port.postMessage(ab, [ab, ab]);
