@@ -11,9 +11,12 @@ export class CustomPathFindingGrid {
   public roomName: string;
   public valueMap: number[][];
   public sources: Source[];
-  public constructor(tiles: PathFindingTile[], sources: Source[], roomName: string) {
+  public minerals: Mineral[];
+
+  public constructor(tiles: PathFindingTile[], sources: Source[], minerals: Mineral[], roomName: string) {
     this.tiles = tiles;
     this.sources = sources;
+    this.minerals = minerals;
     this.roomName = roomName;
   }
 
@@ -99,6 +102,22 @@ export class PathFindingTile {
     this.exit = exit;
     this.value = 0;
   }
+
+  public getNeighbourPositions(): { x: number; y: number }[] {
+    const { x, y } = this.pos;
+    // All eight directions
+    const directions = [
+      { x: x - 1, y: y - 1 }, // top-left
+      { x, y: y - 1 }, // top
+      { x: x + 1, y: y - 1 }, // top-right
+      { x: x - 1, y }, // left
+      { x: x + 1, y }, // right
+      { x: x - 1, y: y + 1 }, // bottom-left
+      { x, y: y + 1 }, // bottom
+      { x: x + 1, y: y + 1 } // bottom-right
+    ];
+    return directions;
+  }
 }
 
 export function visualMap(map: number[][], roomName: string): void {
@@ -116,4 +135,13 @@ export function visualMap(map: number[][], roomName: string): void {
       }
     }
   }
+}
+
+export function visualBuildingPlan(roomName: string): void {
+  Memory.rooms[roomName].plannedBuildings.forEach(buildingPlan =>
+    Game.rooms[roomName].visual.text(buildingPlan.structureType, buildingPlan.pos.x, buildingPlan.pos.y, {
+      color: "#ffffff",
+      font: 0.3
+    })
+  );
 }
