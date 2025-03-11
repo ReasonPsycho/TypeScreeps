@@ -2,6 +2,7 @@ import { visualBuildingPlan } from "./CustomPatfinding";
 
 export default function PlanBuildings(roomName: string): void {
   const centralPos = Memory.rooms[roomName].bestSpawnPosition;
+  console.log(centralPos);
   Game.rooms[roomName].visual.circle(centralPos.x, centralPos.y, { radius: 0.55, stroke: "red" });
   const offsetX = centralPos.x % 4;
   const offsetY = centralPos.y % 4;
