@@ -11,18 +11,6 @@ let cfg;
 
 let op = "op://Screeps/Screeps/Token"
 
-
-// Helper function for getting secrets from 1Password CLI
-function getSecretFromVault(itemName, fieldName, vaultName) {
-  try {
-    // Adjust to include the vault explicitly
-    return execSync(`op read ${op} `, { encoding: 'utf-8' }).trim();
-  } catch (error) {
-    console.error('Error fetching secret');
-    process.exit(1);
-  }
-}
-
 const dest = process.env.DEST;
 if (!dest) {
   console.log("No destination specified - code will be compiled but not uploaded");
@@ -31,15 +19,11 @@ if (!dest) {
 }
 
 
-// Dynamically inject secrets using 1Password CLI
-// Here we retrieve the "Token" property from the "Screeps" item inside the "Screeps" vault
-if (dest === "pserver") {
-  cfg.email = getSecretFromVault("Screeps", "email", "Screeps");
-  cfg.password = getSecretFromVault("Screeps", "password", "Screeps");
-
-} else {
-  cfg.token = getSecretFromVault("Screeps", "Token", "Screeps"); // Assuming the token is stored this way
+if (!process.env.TOKEN) {
+  process.env.TOKEN = execSync(`op read ${op} `, { encoding: 'utf-8' }).trim()
 }
+
+cfg.token = process.env.TOKEN;
 
 export default [{
   input: "src/main.ts",

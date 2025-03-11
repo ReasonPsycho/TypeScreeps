@@ -144,4 +144,8 @@ export function visualBuildingPlan(roomName: string): void {
       font: 0.3
     })
   );
+
+  Memory.rooms[roomName].possibleStructurePositions.forEach(pos => {
+    Game.rooms[roomName].visual.circle(pos.x, pos.y, { radius: 0.2 });
+  });
 }
