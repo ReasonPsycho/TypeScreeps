@@ -155,6 +155,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
   }
 
   for (const name in Memory.rooms) {
+    visualBuildingPlan(name);
     PlanBuildings(name);
   }
 

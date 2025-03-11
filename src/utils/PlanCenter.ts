@@ -62,7 +62,15 @@ export default function PlanCenter(roomName: string): void {
   });
   Memory.rooms[roomName].plannedBuildings.push({
     structureType: STRUCTURE_ROAD,
+    pos: { x: centralPos.x - 3, y: centralPos.y }
+  });
+  Memory.rooms[roomName].plannedBuildings.push({
+    structureType: STRUCTURE_ROAD,
     pos: { x: centralPos.x + 2, y: centralPos.y }
+  });
+  Memory.rooms[roomName].plannedBuildings.push({
+    structureType: STRUCTURE_ROAD,
+    pos: { x: centralPos.x + 3, y: centralPos.y }
   });
   Memory.rooms[roomName].plannedBuildings.push({
     structureType: STRUCTURE_ROAD,
@@ -83,6 +91,10 @@ export default function PlanCenter(roomName: string): void {
   Memory.rooms[roomName].plannedBuildings.push({
     structureType: STRUCTURE_ROAD,
     pos: { x: centralPos.x, y: centralPos.y + 2 }
+  });
+  Memory.rooms[roomName].plannedBuildings.push({
+    structureType: STRUCTURE_ROAD,
+    pos: { x: centralPos.x, y: centralPos.y + 3 }
   });
 
   visualBuildingPlan(roomName);
