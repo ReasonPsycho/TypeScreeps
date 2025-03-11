@@ -3,8 +3,10 @@ import { lerpColor } from "./Visual";
 export default function PlanBuildings(roomName: string): void {
   const dx = [0, 0, 0, -1, +1];
   const dy = [0, -1, +1, 0, 0];
-
   const centralPos = Memory.rooms[roomName].bestSpawnPosition;
+  if (!centralPos || centralPos.x === undefined || centralPos.y === undefined) {
+    return;
+  }
   Game.rooms[roomName].visual.circle(centralPos.x, centralPos.y, { radius: 0.55, stroke: "red" });
   const offsetX = (centralPos.x % 4) + 2;
   const offsetY = centralPos.y % 4;

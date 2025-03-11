@@ -1,6 +1,7 @@
 import SockJS from "sockjs-client";
 import WebSocket, { Event, MessageEvent } from "ws";
 import fetch from "node-fetch";
+import { execSync } from "child_process";
 
 interface UserInfo {
   _id: string;
@@ -39,7 +40,8 @@ interface IAPIOptions {
 }
 
 const url = "https://screeps.com/api/auth/me";
-const apiToken = "245fc98a-a5ef-44f2-89f6-15ab8ef8f049";
+const op = "op://Screeps/Screeps/Token";
+const apiToken = execSync(`op read ${op} `, { encoding: "utf-8" }).trim();
 
 const options: IAPIOptions = {
   method: "GET",
