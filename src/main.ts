@@ -15,7 +15,8 @@ import {
   PLAN_CONTROLLER,
   PLAN_POSSIBLE_STRUCTURE_POSITIONS,
   QueueableFunctionType,
-  QueueableFunctions
+  QueueableFunctions,
+  PLAN_LABS
 } from "./utils/QueueableFunctions";
 import { CustomPathFindingGrid, PathFindingTile, visualBuildingPlan } from "./utils/CustomPatfinding";
 
@@ -118,6 +119,7 @@ global.plan = roomName => {
   global.queuedFunctions.push({ functionType: FIND_BEST_SPOT_CONTROLLER, inputVariables: roomName });
   global.queuedFunctions.push({ functionType: PLAN_CONTROLLER, inputVariables: roomName });
   global.queuedFunctions.push({ functionType: PLAN_POSSIBLE_STRUCTURE_POSITIONS, inputVariables: roomName });
+  global.queuedFunctions.push({ functionType: PLAN_LABS, inputVariables: roomName });
 };
 
 global.queuedFunctions = [];

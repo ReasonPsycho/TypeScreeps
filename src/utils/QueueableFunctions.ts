@@ -2,6 +2,7 @@ import SourceDistance from "./SourceDistance";
 import WallDistance from "./WallDistance";
 import ExitDistance from "./ExitDistance";
 import ControllerDistance from "./ControllerDistance";
+import PlanLabs from "./PlanLabs";
 import FindBestSpotForSpawn from "./FindBestSpotForSpawn";
 import PlanCenter from "./PlanCenter";
 import CenterExitsDistance from "./CenterExitsDistance";
@@ -19,6 +20,7 @@ export const FIND_BEST_SPAWN_POS = "FindBestSpawnPos";
 export const PLAN_CENTER = "PlanCenter";
 export const PLAN_CONTROLLER = "PlanController";
 export const PLAN_POSSIBLE_STRUCTURE_POSITIONS = "PlanPossibleStructurePositions";
+export const PLAN_LABS = "PlanLabs";
 export const FIND_BEST_SPOT_CONTROLLER = "FindBestControllerPos";
 export const EXIT_CENTER_DISTANCE = "CenterExitsDistance";
 
@@ -33,7 +35,8 @@ export const QueueableFunctions = {
   [EXIT_CENTER_DISTANCE]: CenterExitsDistance,
   [PLAN_CONTROLLER]: PlanController,
   [FIND_BEST_SPOT_CONTROLLER]: FindBestSpotForController,
-  [PLAN_POSSIBLE_STRUCTURE_POSITIONS]: PlanPossibleStructurePositions
+  [PLAN_POSSIBLE_STRUCTURE_POSITIONS]: PlanPossibleStructurePositions,
+  [PLAN_LABS]: PlanLabs
 };
 
 export type QueueableFunctionType = keyof typeof QueueableFunctions;
