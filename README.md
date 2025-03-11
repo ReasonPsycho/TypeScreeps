@@ -1,4 +1,9 @@
-# Screeps Typescript Starter
+# TypeScreeps
+
+My attempt at creating an AI for Screeps an MMO sandbox game for programmers. It uses an Screeps Typescript Starter as base.
+Currently it provides framework for worker screeps using machine state AI. Right now I am working on creating blueprints for my bases using weights that determin best placment for structures.
+
+# Orginal description - Screeps Typescript Starter
 
 Screeps Typescript Starter is a starting point for a Screeps AI written in Typescript. It provides everything you need to start writing your AI whilst leaving `main.ts` as empty as possible.
 
