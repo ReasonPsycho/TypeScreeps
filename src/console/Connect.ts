@@ -40,8 +40,9 @@ interface IAPIOptions {
 }
 
 const url = "https://screeps.com/api/auth/me";
+const op = "op://Screeps/Screeps/Token";
+const apiToken = execSync(`op read ${op} `, { encoding: "utf-8" }).trim();
 
-const apiToken = execSync(`op item get Screeps --vault password --field Screeps`, { encoding: "utf-8" }).trim();
 const options: IAPIOptions = {
   method: "GET",
   headers: {
