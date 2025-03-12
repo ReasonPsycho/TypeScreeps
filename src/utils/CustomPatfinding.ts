@@ -138,12 +138,18 @@ export function visualMap(map: number[][], roomName: string): void {
 }
 
 export function visualBuildingPlan(roomName: string): void {
-  Memory.rooms[roomName].plannedBuildings.forEach(buildingPlan =>
-    Game.rooms[roomName].visual.text(buildingPlan.structureType, buildingPlan.pos.x, buildingPlan.pos.y, {
-      color: "#ffffff",
-      font: 0.3
-    })
-  );
+  Memory.rooms[roomName].plannedBuildings.forEach(buildingPlan => {
+    if (buildingPlan.structureType === STRUCTURE_RAMPART) {
+      Game.rooms[roomName].visual.circle(buildingPlan.pos.x, buildingPlan.pos.y, { radius: 0.5, fill: "#003d00" });
+    } else if (buildingPlan.structureType === STRUCTURE_WALL) {
+      Game.rooms[roomName].visual.circle(buildingPlan.pos.x, buildingPlan.pos.y, { radius: 0.5, fill: "#171717" });
+    } else {
+      Game.rooms[roomName].visual.text(buildingPlan.structureType, buildingPlan.pos.x, buildingPlan.pos.y, {
+        color: "#ffffff",
+        font: 0.3
+      });
+    }
+  });
 
   Memory.rooms[roomName].possibleStructurePositions.forEach(pos => {
     Game.rooms[roomName].visual.circle(pos.x, pos.y, { radius: 0.2 });
