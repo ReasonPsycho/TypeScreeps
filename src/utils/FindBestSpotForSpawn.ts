@@ -1,5 +1,4 @@
 import { visualMap } from "./CustomPatfinding";
-import { forEach } from "lodash";
 
 export default function FindBestSpotForSpawn(roomName: string): void {
   const grid = Game.rooms[roomName].getCustomGrid();

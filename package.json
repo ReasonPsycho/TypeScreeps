@@ -14,9 +14,9 @@
     "push-season": "rollup -c --environment DEST:season",
     "push-sim": "rollup -c --environment DEST:sim",
     "test": "npm run test-unit && npm run test-integration && npm run test-functional",
-    "test-unit": "mocha test/unit/**/*.ts",
-    "test-integration": "npm run build && mocha test/integration/**/*.ts",
-    "test-functional": "npm run build && mocha test/functional/**/*.ts",
+    "test-unit": "mocha test/unit/**/*.js",
+    "test-integration": "npm run build && mocha test/integration/**/*.js",
+    "test-functional": "npm run build && mocha test/functional/**/*.js",
     "watch-main": "rollup -cw --environment DEST:main",
     "watch-pserver": "rollup -cw --environment DEST:pserver",
     "watch-season": "rollup -cw --environment DEST:season",
@@ -72,6 +72,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "node-fetch": "^3.3.2",
     "sockjs-client": "^1.6.1",
     "ws": "^8.18.0"

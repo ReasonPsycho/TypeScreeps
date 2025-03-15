@@ -66,7 +66,19 @@ export default function PlanRoads(roomName: string): void {
   minerals.forEach(mineral => {
     mineral.pos
       .findPathTo(Memory.rooms[roomName].bestSpawnPosition.x, Memory.rooms[roomName].bestSpawnPosition.y, {
-        ignoreCreeps: true
+        ignoreCreeps: true,
+        costCallback(callbackRoomName, costMatrix) {
+          // Add planned buildings to the cost matrix
+          const roomMemory = Memory.rooms[callbackRoomName];
+          if (roomMemory && roomMemory.plannedBuildings) {
+            roomMemory.plannedBuildings.forEach(building => {
+              if (building.structureType === STRUCTURE_WALL) {
+                costMatrix.set(building.pos.x, building.pos.y, 255);
+              }
+            });
+          }
+          return costMatrix;
+        }
       })
       .forEach(pos => {
         if (

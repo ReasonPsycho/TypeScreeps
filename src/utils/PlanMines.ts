@@ -9,6 +9,8 @@ export default function PlanMines(roomName: string): void {
       { ignoreCreeps: true }
     );
 
+    Memory.rooms[roomName].sourceMines.push(new RoomPosition(path[0].x, path[0].y, roomName));
+
     Memory.rooms[roomName].plannedBuildings.push({
       structureType: STRUCTURE_LINK,
       pos: { x: path[0].x, y: path[0].y }
@@ -45,14 +47,40 @@ export default function PlanMines(roomName: string): void {
   const minerals = Game.rooms[roomName].find(FIND_MINERALS);
 
   minerals.forEach(mineral => {
+    Memory.rooms[roomName].plannedBuildings.push({
+      structureType: STRUCTURE_EXTRACTOR,
+      pos: { x: mineral.pos.x, y: mineral.pos.y }
+    });
+
     const path = mineral.pos.findPathTo(
       Memory.rooms[roomName].bestSpawnPosition.x,
       Memory.rooms[roomName].bestSpawnPosition.y,
-      { ignoreCreeps: true }
+      {
+        ignoreCreeps: true,
+        costCallback(callbackRoomName, costMatrix) {
+          // Add planned buildings to the cost matrix
+          const roomMemory = Memory.rooms[callbackRoomName];
+          if (roomMemory && roomMemory.plannedBuildings) {
+            roomMemory.plannedBuildings.forEach(building => {
+              if (building.structureType === STRUCTURE_WALL) {
+                costMatrix.set(building.pos.x, building.pos.y, 255);
+              }
+            });
+          }
+          return costMatrix;
+        }
+      }
     );
+
+    Memory.rooms[roomName].mineralMines.push(new RoomPosition(path[0].x, path[0].y, roomName));
 
     Memory.rooms[roomName].plannedBuildings.push({
       structureType: STRUCTURE_RAMPART,
+      pos: { x: path[0].x, y: path[0].y }
+    });
+
+    Memory.rooms[roomName].plannedBuildings.push({
+      structureType: STRUCTURE_CONTAINER,
       pos: { x: path[0].x, y: path[0].y }
     });
 

@@ -1,5 +1,4 @@
-import { assert } from "chai";
-import { helper, playerRoom } from "../helper";
+const { helper, playerRoom } = require("../helper");
 
 describe("functional", () => {
   it("earns energy", async function () {

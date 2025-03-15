@@ -23,6 +23,7 @@ export class CustomPathFindingGrid {
   public setUpGrid(conditionFunction: (tile: PathFindingTile) => boolean): void {
     this.tiles.forEach(tile => {
       if (conditionFunction(tile)) {
+        console.log("yeah?");
         this.openQueue.push(tile);
         this.closedArray.push(tile);
       }
@@ -140,9 +141,17 @@ export function visualMap(map: number[][], roomName: string): void {
 export function visualBuildingPlan(roomName: string): void {
   Memory.rooms[roomName].plannedBuildings.forEach(buildingPlan => {
     if (buildingPlan.structureType === STRUCTURE_RAMPART) {
-      Game.rooms[roomName].visual.circle(buildingPlan.pos.x, buildingPlan.pos.y, { radius: 0.5, fill: "#003d00" });
+      Game.rooms[roomName].visual.rect(buildingPlan.pos.x - 0.5, buildingPlan.pos.y - 0.5, 1, 1, {
+        fill: "#003d00",
+        opacity: 0.8
+      });
     } else if (buildingPlan.structureType === STRUCTURE_WALL) {
-      Game.rooms[roomName].visual.circle(buildingPlan.pos.x, buildingPlan.pos.y, { radius: 0.5, fill: "#171717" });
+      Game.rooms[roomName].visual.rect(buildingPlan.pos.x - 0.5, buildingPlan.pos.y - 0.5, 1, 1, { fill: "#171717" });
+    } else if (buildingPlan.structureType === STRUCTURE_ROAD) {
+      Game.rooms[roomName].visual.rect(buildingPlan.pos.x - 0.5, buildingPlan.pos.y - 0.5, 1, 1, {
+        lineStyle: "dashed",
+        opacity: 0.6
+      });
     } else {
       Game.rooms[roomName].visual.text(buildingPlan.structureType, buildingPlan.pos.x, buildingPlan.pos.y, {
         color: "#ffffff",

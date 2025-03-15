@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: . # Build from current directory
+    container_name: app-dev
+    ports:
+      - "3000:3000" # Map port 3000
+    volumes:
+      # Mount the project directory (local machine → container)
+      - .:/app
+      # Prevent overwriting the container's node_modules with empty host files
+      - /app/node_modules
+    stdin_open: true # Keep stdin open for interactions
+    tty: true        # Enable terminal support

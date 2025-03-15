@@ -54,6 +54,8 @@ declare global {
     bestControllerPosition: RoomPosition | undefined;
     plannedBuildings: PlannedBuilding[];
     possibleStructurePositions: RoomPosition[];
+    sourceMines: RoomPosition[];
+    mineralMines: RoomPosition[];
   }
 
   interface Target {
@@ -108,7 +110,9 @@ global.plan = roomName => {
     bestSpawnPosition: undefined,
     bestControllerPosition: undefined,
     plannedBuildings: [],
-    possibleStructurePositions: []
+    possibleStructurePositions: [],
+    sourceMines: [],
+    mineralMines: []
   };
   global.queuedFunctions.push({ functionType: MAP_WALL_DISTANCE, inputVariables: roomName });
   global.queuedFunctions.push({ functionType: MAP_SOURCE_DISTANCE, inputVariables: roomName });
