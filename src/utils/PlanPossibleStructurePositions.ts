@@ -47,7 +47,7 @@ export default function PlanPossibleStructurePositions(roomName: string): void {
   }
 
   validPositions.sort((a, b) => a.value - b.value);
-  const bestPositions = validPositions.slice(0, 96);
+  const bestPositions = validPositions.slice(0, 79);
 
   // Storing the best positions
   const roomObjects = bestPositions.map(pos => ({ x: pos.x, y: pos.y, value: pos.value }));

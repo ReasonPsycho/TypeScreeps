@@ -1,6 +1,7 @@
 import { visualMap } from "./CustomPatfinding";
 
 export default function FindBestSpotForSpawn(roomName: string): void {
+  console.log("FindBestSpotForSpawn");
   const grid = Game.rooms[roomName].getCustomGrid();
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const map: number[][] = Array(50)
@@ -35,6 +36,7 @@ export default function FindBestSpotForSpawn(roomName: string): void {
   for (let i = 0; i < 8; i++) {
     Memory.rooms[roomName].distanceMaps.ExitDistance[maxValueIndex[0] + dx[i]][maxValueIndex[1] + dy[i]] = 0;
   }
+  console.log("maxValueIndex", maxValueIndex);
   Memory.rooms[roomName].bestSpawnPosition = new RoomPosition(maxValueIndex[0], maxValueIndex[1], roomName);
   visualMap(map, roomName);
 }

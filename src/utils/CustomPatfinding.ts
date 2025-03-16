@@ -23,7 +23,6 @@ export class CustomPathFindingGrid {
   public setUpGrid(conditionFunction: (tile: PathFindingTile) => boolean): void {
     this.tiles.forEach(tile => {
       if (conditionFunction(tile)) {
-        console.log("yeah?");
         this.openQueue.push(tile);
         this.closedArray.push(tile);
       }
@@ -139,7 +138,7 @@ export function visualMap(map: number[][], roomName: string): void {
 }
 
 export function visualBuildingPlan(roomName: string): void {
-  Memory.rooms[roomName].plannedBuildings.forEach(buildingPlan => {
+  Memory.rooms[roomName]?.plannedBuildings?.forEach(buildingPlan => {
     if (buildingPlan.structureType === STRUCTURE_RAMPART) {
       Game.rooms[roomName].visual.rect(buildingPlan.pos.x - 0.5, buildingPlan.pos.y - 0.5, 1, 1, {
         fill: "#003d00",

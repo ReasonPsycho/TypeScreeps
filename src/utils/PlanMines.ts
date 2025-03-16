@@ -12,12 +12,27 @@ export default function PlanMines(roomName: string): void {
     Memory.rooms[roomName].sourceMines.push(new RoomPosition(path[0].x, path[0].y, roomName));
 
     Memory.rooms[roomName].plannedBuildings.push({
+      structureType: STRUCTURE_RAMPART,
+      pos: { x: path[1].x, y: path[1].y }
+    });
+
+    Memory.rooms[roomName].plannedBuildings.push({
       structureType: STRUCTURE_LINK,
-      pos: { x: path[0].x, y: path[0].y }
+      pos: { x: path[1].x, y: path[1].y }
+    });
+
+    Memory.rooms[roomName].plannedBuildings.push({
+      structureType: STRUCTURE_ROAD,
+      pos: { x: path[1].x, y: path[1].y }
     });
 
     Memory.rooms[roomName].plannedBuildings.push({
       structureType: STRUCTURE_RAMPART,
+      pos: { x: path[0].x, y: path[0].y }
+    });
+
+    Memory.rooms[roomName].plannedBuildings.push({
+      structureType: STRUCTURE_CONTAINER,
       pos: { x: path[0].x, y: path[0].y }
     });
 

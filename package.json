@@ -17,6 +17,7 @@
     "test-unit": "mocha test/unit/**/*.js",
     "test-integration": "npm run build && mocha test/integration/**/*.js",
     "test-functional": "npm run build && mocha test/functional/**/*.js",
+    "plan": "npm run build && mocha test/planning/**/*.js",
     "watch-main": "rollup -cw --environment DEST:main",
     "watch-pserver": "rollup -cw --environment DEST:pserver",
     "watch-season": "rollup -cw --environment DEST:season",
