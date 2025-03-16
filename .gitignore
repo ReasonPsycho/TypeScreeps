@@ -7,6 +7,7 @@
 
 # Ignore basic folders
 /dist
+/distConsole
 /.rpt2_cache
 /tsc-out
 /node_modules

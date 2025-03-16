@@ -16,7 +16,9 @@ import {
   PLAN_LABS,
   PLAN_MINES,
   PLAN_POSSIBLE_STRUCTURE_POSITIONS,
+  PLAN_REST,
   PLAN_ROADS,
+  PLAN_TOWERS,
   QueueableFunctionType,
   QueueableFunctions
 } from "./utils/QueueableFunctions";
@@ -128,6 +130,8 @@ global.plan = roomName => {
   global.queuedFunctions.push({ functionType: PLAN_MINES, inputVariables: roomName });
   global.queuedFunctions.push({ functionType: PLAN_ROADS, inputVariables: roomName });
   global.queuedFunctions.push({ functionType: PLAN_LABS, inputVariables: roomName });
+  global.queuedFunctions.push({ functionType: PLAN_TOWERS, inputVariables: roomName });
+  global.queuedFunctions.push({ functionType: PLAN_REST, inputVariables: roomName });
 };
 
 global.queuedFunctions = [];
@@ -177,5 +181,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
         Roles[Memory.creeps[name].role].update(Game.creeps[name]);
       }
     }
+  }
+
+  if (Game.cpu.bucket >= 10000) {
+    Game.cpu.generatePixel();
   }
 });
