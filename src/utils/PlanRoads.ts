@@ -35,37 +35,53 @@ export default function PlanRoads(roomName: string): void {
   const sources = Game.rooms[roomName].find(FIND_SOURCES);
 
   sources.forEach(source => {
-    source.pos
-      .findPathTo(Memory.rooms[roomName].bestSpawnPosition.x, Memory.rooms[roomName].bestSpawnPosition.y, {
+    let hasFinished = false;
+    const path = source.pos.findPathTo(
+      Memory.rooms[roomName].bestSpawnPosition.x,
+      Memory.rooms[roomName].bestSpawnPosition.y,
+      {
         ignoreCreeps: true
-      })
-      .forEach(pos => {
-        if (
-          Memory.rooms[roomName].possibleStructurePositions.some(
-            structurePos => structurePos.x === pos.x && structurePos.y === pos.y
-          ) // Un-optimal ass shit but works
-        )
-          return; // Skip the source's own position
+      }
+    );
 
-        if (
-          Memory.rooms[roomName].plannedBuildings.some(
-            plannedBuilding => plannedBuilding.pos.x === pos.x && plannedBuilding.pos.y === pos.y
-          ) // Un-optimal ass shit but works
-        )
-          return; // Skip the source's own position
+    path.forEach((pos, index) => {
+      if (index <= 2 || hasFinished) {
+        return;
+      }
 
-        Memory.rooms[roomName].plannedBuildings.push({
-          structureType: STRUCTURE_ROAD,
-          pos: { x: pos.x, y: pos.y }
-        });
+      if (
+        Memory.rooms[roomName].possibleStructurePositions.some(
+          structurePos => structurePos.x === pos.x && structurePos.y === pos.y
+        ) ||
+        Memory.rooms[roomName].plannedBuildings.some(
+          plannedBuilding => plannedBuilding.pos.x === pos.x && plannedBuilding.pos.y === pos.y
+        ) // Un-optimal ass shit but works
+      ) {
+        if (!Memory.rooms[roomName].plannedBuildings.some(building => building.structureType === STRUCTURE_RAMPART)) {
+          Memory.rooms[roomName].plannedBuildings.push({
+            structureType: STRUCTURE_RAMPART,
+            pos: { x: path[index - 1].x, y: path[index - 1].y }
+          });
+        }
+        hasFinished = true;
+        return; // Skip the source's own position
+      }
+
+      Memory.rooms[roomName].plannedBuildings.push({
+        structureType: STRUCTURE_ROAD,
+        pos: { x: pos.x, y: pos.y }
       });
+    });
   });
 
   const minerals = Game.rooms[roomName].find(FIND_MINERALS);
 
   minerals.forEach(mineral => {
-    mineral.pos
-      .findPathTo(Memory.rooms[roomName].bestSpawnPosition.x, Memory.rooms[roomName].bestSpawnPosition.y, {
+    let hasFinished = false;
+    const path = mineral.pos.findPathTo(
+      Memory.rooms[roomName].bestSpawnPosition.x,
+      Memory.rooms[roomName].bestSpawnPosition.y,
+      {
         ignoreCreeps: true,
         costCallback(callbackRoomName, costMatrix) {
           // Add planned buildings to the cost matrix
@@ -79,26 +95,34 @@ export default function PlanRoads(roomName: string): void {
           }
           return costMatrix;
         }
-      })
-      .forEach(pos => {
-        if (
-          Memory.rooms[roomName].possibleStructurePositions.some(
-            structurePos => structurePos.x === pos.x && structurePos.y === pos.y
-          ) // Un-optimal ass shit but works
-        )
-          return; // Skip the source's own position
+      }
+    );
 
-        if (
-          Memory.rooms[roomName].plannedBuildings.some(
-            plannedBuilding => plannedBuilding.pos.x === pos.x && plannedBuilding.pos.y === pos.y
-          ) // Un-optimal ass shit but works
-        )
-          return; // Skip the source's own position
+    path.forEach((pos, index) => {
+      if (index === 0 || hasFinished) {
+        return;
+      }
 
+      if (
+        Memory.rooms[roomName].possibleStructurePositions.some(
+          structurePos => structurePos.x === pos.x && structurePos.y === pos.y
+        ) ||
+        Memory.rooms[roomName].plannedBuildings.some(
+          plannedBuilding => plannedBuilding.pos.x === pos.x && plannedBuilding.pos.y === pos.y
+        ) // Un-optimal ass shit but works
+      ) {
         Memory.rooms[roomName].plannedBuildings.push({
-          structureType: STRUCTURE_ROAD,
-          pos: { x: pos.x, y: pos.y }
+          structureType: STRUCTURE_RAMPART,
+          pos: { x: path[index - 1].x, y: path[index - 1].y }
         });
+        hasFinished = true;
+        return; // Skip the source's own position
+      }
+
+      Memory.rooms[roomName].plannedBuildings.push({
+        structureType: STRUCTURE_ROAD,
+        pos: { x: pos.x, y: pos.y }
       });
+    });
   });
 }

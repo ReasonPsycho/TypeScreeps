@@ -39,9 +39,19 @@ declare global {
     inputVariables: any;
   }
 
+  export enum StructureAttribute {
+    PRIORITY = "priority", // For high-priority structures
+    TEMPORARY = "temporary", // For temporary or test structures
+    CRITICAL = "critical", // For critical structures, e.g., essential for base functionality
+    DEFENSE = "defense", // For defensive structures like walls or towers
+    STORAGE = "storage", // For storage-related structures
+    UTILITY = "utility" // Other special-purpose structures
+  }
+
   interface PlannedBuilding {
     structureType: StructureConstant;
     pos: { x: number; y: number };
+    StructureAttribute?: StructureAttribute[];
   }
 
   interface CreepMemory {
